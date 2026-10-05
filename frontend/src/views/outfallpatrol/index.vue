@@ -79,6 +79,7 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
+import { pushConclusionToWarn } from '@/api/outfall-reach'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('outfallpatrol')
@@ -118,6 +119,13 @@ function runAction(action: string, row: EntryRow) {
   if (!result.ok) {
     errorMessage.value = result.message
     return
+  }
+  // 巡查办结的结论落到防涝预警的待拟清单，同一巡查编号只落一次。
+  if (action === '确认完成') {
+    const push = pushConclusionToWarn(row)
+    if (!push.ok) {
+      errorMessage.value = push.message
+    }
   }
   reload()
 }
